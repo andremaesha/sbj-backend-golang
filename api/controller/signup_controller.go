@@ -1,0 +1,57 @@
+package controller
+
+import (
+	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"sbj-backend/bootstrap"
+	"sbj-backend/domain"
+	"sbj-backend/internal/encry"
+	"time"
+)
+
+type SignupController struct {
+	SignupUsecase domain.SignupUsecase
+	Env           *bootstrap.Env
+}
+
+func (sc *SignupController) Signup(c *fiber.Ctx) error {
+	request := new(domain.SignupRequest)
+
+	if c.BodyParser(request) != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
+	}
+
+	_, err := sc.SignupUsecase.GetUserByEmail(c.Context(), request.Email)
+	if err == nil {
+		return c.Status(fiber.StatusConflict).JSON(domain.ErrorResponse{Message: "user already exists with the given email"})
+	}
+
+	encryptedPassword, err := encry.HashPassword(request.Password)
+	if err != nil {
+		println(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{
+			RequestId: fmt.Sprintf("request_%s", time.Now().Format("20060102150405")),
+			Message:   "internal server error",
+		})
+	}
+
+	user := &domain.User{
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
+		Email:     request.Email,
+		Password:  encryptedPassword,
+	}
+
+	err = sc.SignupUsecase.Create(c.Context(), user)
+	if err != nil {
+		println(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{
+			RequestId: fmt.Sprintf("request_%s", time.Now().Format("20060102150405")),
+			Message:   "internal server error",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.SignupResponse{
+		Message: "success",
+	})
+}
