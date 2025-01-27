@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"log"
 	"os"
 	"os/signal"
 	"sbj-backend/api/route"
 	"sbj-backend/bootstrap"
+	"sbj-backend/internal/middlewares"
 	"syscall"
 	"time"
 )
@@ -24,8 +26,11 @@ func main() {
 		AppName:      "SBJ Backend",
 		ServerHeader: "backend-sbj-service",
 	})
-
+	f.Get("/metrics", monitor.New())
+	f.Use(middlewares.ResponseLogger)
+	f.Use(middlewares.ErrorHandler)
 	route.Setup(env, timeout, db, f)
+	f.Use(middlewares.NotFoundMiddleware)
 
 	go func() {
 		if err := f.Listen(":7856"); err != nil {
