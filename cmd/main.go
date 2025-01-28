@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"os"
 	"os/signal"
@@ -26,10 +27,18 @@ func main() {
 		AppName:      "SBJ Backend",
 		ServerHeader: "backend-sbj-service",
 	})
+
+	store := session.New(session.Config{
+		CookieHTTPOnly: true,
+		CookieSecure:   true,
+		CookieSameSite: "Strict",
+		Expiration:     time.Minute * 10,
+	})
+
 	f.Get("/metrics", monitor.New())
 	f.Use(middlewares.ResponseLogger)
 	f.Use(middlewares.ErrorHandler)
-	route.Setup(env, timeout, db, f)
+	route.Setup(env, store, timeout, db, f)
 	f.Use(middlewares.NotFoundMiddleware)
 
 	go func() {

@@ -41,7 +41,7 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 		panic(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(domain.SignupResponse{
+	return c.Status(fiber.StatusCreated).JSON(domain.SignupResponse{
 		Message: "success",
 	})
 }
