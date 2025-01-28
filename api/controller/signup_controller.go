@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/internal/encry"
-	"time"
 )
 
 type SignupController struct {
@@ -28,11 +26,7 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 
 	encryptedPassword, err := encry.HashPassword(request.Password)
 	if err != nil {
-		println(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{
-			RequestId: fmt.Sprintf("request_%s", time.Now().Format("20060102150405")),
-			Message:   "internal server error",
-		})
+		panic(err)
 	}
 
 	user := &domain.User{
@@ -44,14 +38,10 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 
 	err = sc.SignupUsecase.Create(c.Context(), user)
 	if err != nil {
-		println(err.Error())
-		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{
-			RequestId: fmt.Sprintf("request_%s", time.Now().Format("20060102150405")),
-			Message:   "internal server error",
-		})
+		panic(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(domain.SignupResponse{
+	return c.Status(fiber.StatusCreated).JSON(domain.SignupResponse{
 		Message: "success",
 	})
 }
