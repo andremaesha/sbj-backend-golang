@@ -20,3 +20,10 @@ func (lu *loginUsecase) GetUserByEmail(c context.Context, email string) (*domain
 	defer cancel()
 	return lu.userRepository.GetByEmail(ctx, email)
 }
+
+func (lu *loginUsecase) SetSession(c context.Context, idSession string, data *domain.User) error {
+	ctx, cancel := context.WithTimeout(c, lu.contextTimeout)
+	defer cancel()
+
+	return lu.userRepository.SetSession(ctx, idSession, data)
+}

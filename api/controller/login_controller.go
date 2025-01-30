@@ -17,7 +17,7 @@ type LoginController struct {
 
 func (lc *LoginController) Login(c *fiber.Ctx) error {
 	request := new(domain.LoginRequest)
-	idSession := uuid.New()
+	sessionId := uuid.New().String()
 
 	if c.BodyParser(request) != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
@@ -32,19 +32,13 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
 	}
 
-	sess, err := lc.Session.Get(c)
+	err = lc.LoginUsecase.SetSession(c.Context(), sessionId, user)
 	if err != nil {
 		panic(err)
 	}
 
-	sess.Set("user", user.Email)
-	sess.Set("userid", idSession.String())
-	if err = sess.Save(); err != nil {
-		panic(err)
-	}
-
 	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
-		Id:      "",
+		Id:      sessionId,
 		Email:   user.Email,
 		Message: "success",
 	})

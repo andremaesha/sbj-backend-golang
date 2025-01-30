@@ -7,13 +7,14 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/psql"
+	"sbj-backend/redis"
 	"sbj-backend/repository"
 	"sbj-backend/usecase"
 	"time"
 )
 
-func NewLoginRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, f fiber.Router) {
-	ur := repository.NewUserRepository(db, domain.TableUser)
+func NewLoginRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, redis redis.Database, f fiber.Router) {
+	ur := repository.NewUserRepository(db, redis, domain.TableUser, env.RedisDB)
 	lc := controller.LoginController{
 		LoginUsecase: usecase.NewLoginUsecase(ur, timeout),
 		Env:          env,

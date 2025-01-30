@@ -3,28 +3,20 @@ package bootstrap
 import (
 	"context"
 	"log"
-	"sbj-backend/psql"
+	"sbj-backend/redis"
 	"time"
 )
 
-func NewPsql(env *Env) psql.Client {
+func NewRedis(env *Env) redis.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	config := dsn(
-		env.DBHost,
-		env.DBPort,
-		env.DBUser,
-		env.DBPass,
-		env.DBName,
-	)
+	addr := env.RedisHost + ":" + env.RedisPort
+	username := env.RedisUser
+	password := env.RedisPassword
+	db := env.RedisDB
 
-	client, err := psql.NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	err = client.Ping(ctx)
+	client, err := redis.NewClient(addr, username, password, db)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +29,7 @@ func NewPsql(env *Env) psql.Client {
 	return client
 }
 
-func ClosePsqlConnection(client psql.Client) {
+func CloseRedisConnection(client redis.Client) {
 	if client == nil {
 		return
 	}
@@ -47,5 +39,5 @@ func ClosePsqlConnection(client psql.Client) {
 		panic(err)
 	}
 
-	log.Println("Connection to psql closed.")
+	log.Println("Connection to redis closed.")
 }
