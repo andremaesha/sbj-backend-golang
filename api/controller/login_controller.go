@@ -7,6 +7,7 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/internal/encry"
+	"time"
 )
 
 type LoginController struct {
@@ -32,10 +33,19 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
 	}
 
-	err = lc.LoginUsecase.SetSession(c.Context(), sessionId, user)
+	err = lc.LoginUsecase.SetSession(c.Context(), lc.Env.RedisExpireTime, sessionId, user)
 	if err != nil {
 		panic(err)
 	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "session_id",
+		Value:    sessionId,
+		Expires:  time.Now().Add(time.Minute * time.Duration(lc.Env.RedisExpireTime)),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Strict",
+	})
 
 	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
 		Id:      sessionId,

@@ -22,5 +22,6 @@ type User struct {
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByEmail(c context.Context, email string) (*User, error)
+	SetExpire(expire int)
 	SetSession(ctx context.Context, idSession string, user *User) error
 }

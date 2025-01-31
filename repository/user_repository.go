@@ -20,6 +20,10 @@ func NewUserRepository(database psql.Database, redis redis.Database, table strin
 	return &userRepository{database: database, redis: redis, table: table, redisTable: redisTable}
 }
 
+func (ur *userRepository) SetExpire(expire int) {
+	ur.expire = expire
+}
+
 func (ur *userRepository) Create(ctx context.Context, user *domain.User) error {
 	table := ur.database.Table(ur.table)
 
