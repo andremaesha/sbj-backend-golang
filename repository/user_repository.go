@@ -5,19 +5,18 @@ import (
 	"sbj-backend/domain"
 	"sbj-backend/psql"
 	"sbj-backend/redis"
-	"strconv"
 )
 
 type userRepository struct {
-	database   psql.Database
-	redis      redis.Database
-	table      string
-	redisTable int
-	expire     int
+	database    psql.Database
+	redis       redis.Database
+	table       string
+	redisPrefix []string
+	expire      int
 }
 
-func NewUserRepository(database psql.Database, redis redis.Database, table string, redisTable int) domain.UserRepository {
-	return &userRepository{database: database, redis: redis, table: table, redisTable: redisTable}
+func NewUserRepository(database psql.Database, redis redis.Database, table string, redisPrefix ...string) domain.UserRepository {
+	return &userRepository{database: database, redis: redis, table: table, redisPrefix: redisPrefix}
 }
 
 func (ur *userRepository) SetExpire(expire int) {
@@ -31,9 +30,15 @@ func (ur *userRepository) Create(ctx context.Context, user *domain.User) error {
 }
 
 func (ur *userRepository) SetSession(ctx context.Context, idSession string, user *domain.User) error {
-	table := ur.redis.Table(strconv.Itoa(ur.redisTable))
+	table := ur.redis.Table(ur.redisPrefix[0])
 
 	return table.HashSet(ctx, ur.expire, idSession, user)
+}
+
+func (ur *userRepository) DeleteSession(ctx context.Context, idSession string) (int64, error) {
+	table := ur.redis.Table(ur.redisPrefix[0])
+
+	return table.Del(ctx, idSession)
 }
 
 func (ur *userRepository) GetByEmail(c context.Context, email string) (*domain.User, error) {

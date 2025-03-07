@@ -87,12 +87,12 @@ func (rt *redisTable) Set(ctx context.Context, key string, value string, expirat
 func (rt *redisTable) HashSet(ctx context.Context, expire int, sessionId string, data any) error {
 	timeExpire := time.Minute * time.Duration(expire)
 
-	err := rt.client.HSet(ctx, "session:"+sessionId, data).Err()
+	err := rt.client.HSet(ctx, rt.prefix+sessionId, data).Err()
 	if err != nil {
 		return err
 	}
 
-	return rt.client.Expire(ctx, "session:"+sessionId, timeExpire).Err()
+	return rt.client.Expire(ctx, rt.prefix+sessionId, timeExpire).Err()
 }
 
 func (rt *redisTable) Del(ctx context.Context, key string) (int64, error) {

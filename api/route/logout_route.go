@@ -5,14 +5,20 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/api/controller"
 	"sbj-backend/bootstrap"
+	"sbj-backend/domain"
 	"sbj-backend/psql"
+	"sbj-backend/redis"
+	"sbj-backend/repository"
+	"sbj-backend/usecase"
 	"time"
 )
 
-func NewLogoutRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, f fiber.Router) {
+func NewLogoutRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, redis redis.Database, f fiber.Router) {
+	ur := repository.NewUserRepository(db, redis, domain.TableUser, "session:")
 	lc := controller.LogoutController{
-		Env:     env,
-		Session: session,
+		LogoutUsecase: usecase.NewLogoutUsecase(ur, timeout),
+		Env:           env,
+		Session:       session,
 	}
 
 	f.Get("/logout", lc.Logout)

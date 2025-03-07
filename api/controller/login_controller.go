@@ -38,9 +38,11 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		panic(err)
 	}
 
+	encryptSession := lc.LoginUsecase.EncryptSession(lc.Env.Key, sessionId)
+
 	c.Cookie(&fiber.Cookie{
 		Name:     "session_id",
-		Value:    sessionId,
+		Value:    encryptSession,
 		Expires:  time.Now().Add(time.Minute * time.Duration(lc.Env.RedisExpireTime)),
 		HTTPOnly: true,
 		Secure:   true,
@@ -48,7 +50,7 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 	})
 
 	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
-		Id:      sessionId,
+		Id:      encryptSession,
 		Email:   user.Email,
 		Message: "success",
 	})

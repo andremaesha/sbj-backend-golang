@@ -14,7 +14,7 @@ import (
 )
 
 func NewLoginRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, redis redis.Database, f fiber.Router) {
-	ur := repository.NewUserRepository(db, redis, domain.TableUser, env.RedisDB)
+	ur := repository.NewUserRepository(db, redis, domain.TableUser, "session:")
 	lc := controller.LoginController{
 		LoginUsecase: usecase.NewLoginUsecase(ur, timeout),
 		Env:          env,

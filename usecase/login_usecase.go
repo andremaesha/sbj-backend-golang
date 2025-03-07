@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"sbj-backend/domain"
+	"sbj-backend/internal/helpers"
 	"time"
 )
 
@@ -27,4 +28,13 @@ func (lu *loginUsecase) SetSession(c context.Context, expire int, idSession stri
 
 	lu.userRepository.SetExpire(expire)
 	return lu.userRepository.SetSession(ctx, idSession, data)
+}
+
+func (lu *loginUsecase) EncryptSession(key, data string) string {
+	content, err := helpers.EncryptAES(data, key)
+	if err != nil {
+		panic(err)
+	}
+
+	return content
 }

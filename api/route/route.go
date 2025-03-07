@@ -13,5 +13,5 @@ func Setup(env *bootstrap.Env, session *session.Store, timeout time.Duration, db
 	publicRouter := f.Group("/api")
 	NewSignupRouter(env, session, timeout, db, redis, publicRouter)
 	NewLoginRouter(env, session, timeout, db, redis, publicRouter)
-	NewLogoutRouter(env, session, timeout, db, publicRouter)
+	NewLogoutRouter(env, session, timeout, db, redis, publicRouter)
 }
