@@ -1,6 +1,10 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"mime/multipart"
+	"sbj-backend/bootstrap"
+)
 
 type SignupRequest struct {
 	FirstName string `json:"first_name"`
@@ -14,7 +18,15 @@ type SignupResponse struct {
 	Message string `json:"message"`
 }
 
+type UploadAvatarResponse struct {
+	Id        string `json:"id"`
+	Filename  string `json:"filename"`
+	UrlAvatar string `json:"url_avatar"`
+	Message   string `json:"message"`
+}
+
 type SignupUsecase interface {
 	Create(c context.Context, user *User) error
 	GetUserByEmail(c context.Context, email string) (*User, error)
+	UploadAvatar(env *bootstrap.Env, fileHeader *multipart.FileHeader) (*ResponseCloudinary, error)
 }

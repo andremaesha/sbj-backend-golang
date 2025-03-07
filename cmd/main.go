@@ -19,6 +19,7 @@ func main() {
 	app := bootstrap.App()
 	env := app.Env
 	db := app.Psql.Database()
+	redis := app.Redis.Database()
 	defer app.CloseDBConnection()
 
 	timeout := time.Duration(env.ContextTimeout) * time.Second
@@ -38,7 +39,7 @@ func main() {
 	f.Get("/metrics", monitor.New())
 	f.Use(middlewares.ResponseLogger)
 	f.Use(middlewares.ErrorHandler)
-	route.Setup(env, store, timeout, db, f)
+	route.Setup(env, store, timeout, db, redis, f)
 	f.Use(middlewares.NotFoundMiddleware)
 
 	go func() {

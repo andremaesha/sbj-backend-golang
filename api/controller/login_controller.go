@@ -7,6 +7,7 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/internal/encry"
+	"time"
 )
 
 type LoginController struct {
@@ -17,7 +18,7 @@ type LoginController struct {
 
 func (lc *LoginController) Login(c *fiber.Ctx) error {
 	request := new(domain.LoginRequest)
-	idSession := uuid.New()
+	sessionId := uuid.New().String()
 
 	if c.BodyParser(request) != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
@@ -32,19 +33,24 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
 	}
 
-	sess, err := lc.Session.Get(c)
+	err = lc.LoginUsecase.SetSession(c.Context(), lc.Env.RedisExpireTime, sessionId, user)
 	if err != nil {
 		panic(err)
 	}
 
-	sess.Set("user", user.Email)
-	sess.Set("userid", idSession.String())
-	if err = sess.Save(); err != nil {
-		panic(err)
-	}
+	encryptSession := lc.LoginUsecase.EncryptSession(lc.Env.Key, sessionId)
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "session_id",
+		Value:    encryptSession,
+		Expires:  time.Now().Add(time.Minute * time.Duration(lc.Env.RedisExpireTime)),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Strict",
+	})
 
 	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
-		Id:      "",
+		Id:      encryptSession,
 		Email:   user.Email,
 		Message: "success",
 	})

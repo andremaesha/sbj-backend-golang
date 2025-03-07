@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/internal/encry"
@@ -43,5 +44,28 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(domain.SignupResponse{
 		Message: "success",
+	})
+}
+
+func (sc *SignupController) UploadAvatar(c *fiber.Ctx) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "file is required"})
+	}
+
+	idFile := uuid.New().String()
+
+	newFileName := idFile + "_ori_" + file.Filename
+
+	responseCloudinary, err := sc.SignupUsecase.UploadAvatar(sc.Env, file)
+	if err != nil {
+		panic(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.UploadAvatarResponse{
+		Id:        idFile,
+		Filename:  newFileName,
+		UrlAvatar: responseCloudinary.SecureUrl,
+		Message:   "success",
 	})
 }

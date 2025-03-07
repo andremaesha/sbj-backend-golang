@@ -8,30 +8,21 @@ import (
 const TableUser = "dbo.users"
 
 type User struct {
-	Id          int        `gorm:"primaryKey;autoIncrement"`
+	Id          int        `gorm:"primaryKey;autoIncrement" redis:"user_id"`
 	Verified    bool       `gorm:"default:false"`
 	FirstName   string     `gorm:"not null"`
 	LastName    string     `gorm:"not null"`
-	Email       string     `gorm:"unique;not null"`
+	Email       string     `gorm:"unique;not null" redis:"email"`
 	Password    string     `gorm:"not null"`
 	AvatarId    int        `gorm:"default:NULL"`
-	Role        string     `gorm:"default:'user'"`
+	Role        string     `gorm:"default:'user'" redis:"role"`
 	CreatedDate *time.Time `gorm:"default:NULL"`
 }
-
-//type User struct {
-//	Id          int
-//	Verified    *sql.NullBool
-//	FirstName   string
-//	LastName    string
-//	Email       string
-//	Password    string
-//	AvatarId    *sql.NullInt64
-//	Role        *sql.NullString
-//	CreatedDate *sql.NullString
-//}
 
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByEmail(c context.Context, email string) (*User, error)
+	SetExpire(expire int)
+	SetSession(ctx context.Context, idSession string, user *User) error
+	DeleteSession(ctx context.Context, idSession string) (int64, error)
 }
