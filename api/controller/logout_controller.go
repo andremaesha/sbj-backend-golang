@@ -4,12 +4,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/bootstrap"
-	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"time"
 )
 
 type LogoutController struct {
-	LogoutUsecase domain.LogoutUsecase
+	LogoutUsecase web.LogoutUsecase
 	Env           *bootstrap.Env
 	Session       *session.Store
 }
@@ -18,7 +18,7 @@ func (lc *LogoutController) Logout(c *fiber.Ctx) error {
 	sessionId := c.Cookies("session_id")
 	println(sessionId)
 	if sessionId == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(&domain.LogoutResponse{
+		return c.Status(fiber.StatusUnauthorized).JSON(&web.LogoutResponse{
 			Message: "session not found",
 		})
 	}
@@ -39,7 +39,7 @@ func (lc *LogoutController) Logout(c *fiber.Ctx) error {
 		SameSite: "Strict",
 	})
 
-	return c.Status(fiber.StatusOK).JSON(domain.LogoutResponse{
+	return c.Status(fiber.StatusOK).JSON(web.LogoutResponse{
 		Message: "Logout successful",
 	})
 }

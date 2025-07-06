@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"sbj-backend/internal/helpers"
 	"time"
 )
@@ -13,7 +14,7 @@ type loginUsecase struct {
 	contextTimeout time.Duration
 }
 
-func NewLoginUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) domain.LoginUsecase {
+func NewLoginUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.LoginUsecase {
 	return &loginUsecase{userRepository: userRepository, contextTimeout: contextTimeout}
 }
 

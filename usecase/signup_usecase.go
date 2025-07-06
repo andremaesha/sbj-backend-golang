@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"sbj-backend/internal/curl"
 	"sbj-backend/internal/helpers"
 	"time"
@@ -17,7 +18,7 @@ type signupUsecase struct {
 	contextTimeout time.Duration
 }
 
-func NewSignupUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) domain.SignupUsecase {
+func NewSignupUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.SignupUsecase {
 	return &signupUsecase{userRepository: userRepository, contextTimeout: contextTimeout}
 }
 

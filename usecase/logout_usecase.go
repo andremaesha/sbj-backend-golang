@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"sbj-backend/internal/helpers"
 	"time"
 )
@@ -12,7 +13,7 @@ type LogoutUsecase struct {
 	contextTimeout time.Duration
 }
 
-func NewLogoutUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) domain.LogoutUsecase {
+func NewLogoutUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.LogoutUsecase {
 	return &LogoutUsecase{userRepository: userRepository, contextTimeout: contextTimeout}
 }
 

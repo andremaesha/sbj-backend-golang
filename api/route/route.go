@@ -14,4 +14,6 @@ func Setup(env *bootstrap.Env, session *session.Store, timeout time.Duration, db
 	NewSignupRouter(env, session, timeout, db, redis, publicRouter)
 	NewLoginRouter(env, session, timeout, db, redis, publicRouter)
 	NewLogoutRouter(env, session, timeout, db, redis, publicRouter)
+
+	NewProductsRouter(env, session, timeout, db, redis, publicRouter)
 }

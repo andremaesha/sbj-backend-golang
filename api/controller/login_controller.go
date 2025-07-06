@@ -6,18 +6,19 @@ import (
 	"github.com/google/uuid"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"sbj-backend/internal/encry"
 	"time"
 )
 
 type LoginController struct {
-	LoginUsecase domain.LoginUsecase
+	LoginUsecase web.LoginUsecase
 	Env          *bootstrap.Env
 	Session      *session.Store
 }
 
 func (lc *LoginController) Login(c *fiber.Ctx) error {
-	request := new(domain.LoginRequest)
+	request := new(web.LoginRequest)
 	sessionId := uuid.New().String()
 
 	if c.BodyParser(request) != nil {
@@ -54,7 +55,7 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		SameSite: "Strict",
 	})
 
-	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
+	return c.Status(fiber.StatusOK).JSON(web.LoginResponse{
 		Id:      encryptSession,
 		Email:   user.Email,
 		Message: "success",

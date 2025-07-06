@@ -1,4 +1,4 @@
-package domain
+package web
 
 import "context"
 
