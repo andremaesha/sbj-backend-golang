@@ -33,6 +33,11 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
 	}
 
+	err = lc.LoginUsecase.ValidateUserVerified(user.Verified)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: err.Error()})
+	}
+
 	err = lc.LoginUsecase.SetSession(c.Context(), lc.Env.RedisExpireTime, sessionId, user)
 	if err != nil {
 		panic(err)
