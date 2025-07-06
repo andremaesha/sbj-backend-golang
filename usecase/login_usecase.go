@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"sbj-backend/domain"
 	"sbj-backend/internal/helpers"
 	"time"
@@ -20,6 +21,14 @@ func (lu *loginUsecase) GetUserByEmail(c context.Context, email string) (*domain
 	ctx, cancel := context.WithTimeout(c, lu.contextTimeout)
 	defer cancel()
 	return lu.userRepository.GetByEmail(ctx, email)
+}
+
+func (lu *loginUsecase) ValidateUserVerified(verified bool) error {
+	if verified {
+		return nil
+	}
+
+	return errors.New("user not verified, please verify your email first")
 }
 
 func (lu *loginUsecase) SetSession(c context.Context, expire int, idSession string, data *domain.User) error {
