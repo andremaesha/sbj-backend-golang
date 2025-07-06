@@ -15,15 +15,15 @@ func NewImagesRepository(database psql.Database, table string) domain.ImagesRepo
 	return &imagesRepository{database: database, table: table}
 }
 
-func (ir *imagesRepository) GetDataById(ctx context.Context, id int) (*domain.Images, error) {
+func (ir *imagesRepository) GetDataById(ctx context.Context, id int) *domain.Images {
 	result := new(domain.Images)
 
 	err := ir.database.Table(ir.table).FindOne(ctx, result, "id = ?", id)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return result, nil
+	return result
 }
 
 func (ir *imagesRepository) Create(ctx context.Context, image *domain.Images) error {

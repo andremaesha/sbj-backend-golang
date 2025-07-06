@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"gorm.io/gorm"
 	"sbj-backend/domain"
@@ -17,10 +18,10 @@ func NewProductsRepository(database psql.Database, table string) domain.Products
 	return &productsRepository{database: database, table: table}
 }
 
-func (pr *productsRepository) GetDataById(id int) (*domain.Product, error) {
+func (pr *productsRepository) GetDataById(c context.Context, id int) (*domain.Product, error) {
 	result := new(domain.Product)
 
-	err := pr.database.Table(pr.table).FindOne(nil, result, "id = ?", id)
+	err := pr.database.Table(pr.table).FindOne(c, result, "id = ?", id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errCus.ErrDataNotFound

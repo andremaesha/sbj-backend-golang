@@ -17,6 +17,6 @@ type Images struct {
 }
 
 type ImagesRepository interface {
-	GetDataById(ctx context.Context, id int) (*Images, error)
+	GetDataById(ctx context.Context, id int) *Images
 	Create(ctx context.Context, image *Images) error
 }

@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const TableProducts = "dbo.products"
 
@@ -22,5 +25,5 @@ type Product struct {
 }
 
 type ProductsRepository interface {
-	GetDataById(id int) (*Product, error)
+	GetDataById(c context.Context, id int) (*Product, error)
 }

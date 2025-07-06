@@ -23,7 +23,7 @@ func (p *ProductsController) Product(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := p.ProductsUsecase.Product(id)
+	response, err := p.ProductsUsecase.Product(c.Context(), id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: err.Error()})
 	}
