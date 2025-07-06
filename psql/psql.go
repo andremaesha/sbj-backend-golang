@@ -127,7 +127,7 @@ func (gt *gormTable) Find(ctx context.Context, result any, query string, args ..
 
 func (gt *gormTable) CountDocuments(ctx context.Context, result any, query string, args ...any) (int64, error) {
 	var count int64
-	err := gt.db.WithContext(ctx).Table(gt.table).Where(query, args...).Count(&count).Error
+	err := gt.db.WithContext(ctx).Table(gt.table).Where(query, args...).Find(&result).Count(&count).Error
 	return count, err
 }
 
