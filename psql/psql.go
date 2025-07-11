@@ -23,7 +23,7 @@ type Table interface {
 	DeleteOne(context.Context, string, ...any) (int64, error)
 	Find(context.Context, any, string, ...any) error
 	CountDocuments(context.Context, any, string, ...any) (int64, error)
-	UpdateOne(context.Context, string, any, ...any) error
+	UpdateOne(context.Context, any) error
 	UpdateMany(context.Context, string, any, ...any) error
 }
 
@@ -121,8 +121,8 @@ func (gt *gormTable) DeleteOne(ctx context.Context, query string, args ...any) (
 	return result.RowsAffected, result.Error
 }
 
-func (gt *gormTable) Find(ctx context.Context, result any, query string, args ...any) error {
-	return gt.db.WithContext(ctx).Table(gt.table).Where(query, args...).Find(result).Error
+func (gt *gormTable) Find(ctx context.Context, results any, query string, args ...any) error {
+	return gt.db.WithContext(ctx).Table(gt.table).Where(query, args...).Find(results).Error
 }
 
 func (gt *gormTable) CountDocuments(ctx context.Context, result any, query string, args ...any) (int64, error) {
@@ -131,8 +131,8 @@ func (gt *gormTable) CountDocuments(ctx context.Context, result any, query strin
 	return count, err
 }
 
-func (gt *gormTable) UpdateOne(ctx context.Context, query string, updates any, args ...any) error {
-	return gt.db.WithContext(ctx).Table(gt.table).Where(query, args...).Updates(updates).Error
+func (gt *gormTable) UpdateOne(ctx context.Context, update any) error {
+	return gt.db.WithContext(ctx).Table(gt.table).Updates(update).Error
 }
 
 func (gt *gormTable) UpdateMany(ctx context.Context, query string, updates any, args ...any) error {

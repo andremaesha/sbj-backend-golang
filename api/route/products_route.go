@@ -24,4 +24,5 @@ func NewProductsRouter(env *bootstrap.Env, session *session.Store, timeout time.
 	}
 
 	f.Get("/product", pc.Product)
+	f.Get("/products", pc.Products)
 }

@@ -18,6 +18,7 @@ type Product struct {
 	Stock        int        `gorm:"default:0"`
 	NumOfReviews int        `gorm:"default:0"`
 	ReviewsId    int        `gorm:"default:null"`
+	IsActive     bool       `gorm:"default:false"`
 	CreatedBy    string     `gorm:"default:'SYSTEM'"`
 	CreatedAt    *time.Time `gorm:"default:now()"`
 	UpdatedBy    string     `gorm:"default:null"`
@@ -26,4 +27,5 @@ type Product struct {
 
 type ProductsRepository interface {
 	GetDataById(c context.Context, id int) (*Product, error)
+	Datas(c context.Context) []*Product
 }

@@ -38,7 +38,7 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 		Password:  encryptedPassword,
 	}
 
-	err = sc.SignupUsecase.Create(c.Context(), user)
+	err = sc.SignupUsecase.Create(c.Context(), user, request.Avatar)
 	if err != nil {
 		panic(err)
 	}

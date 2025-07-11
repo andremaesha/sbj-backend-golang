@@ -19,7 +19,7 @@ func NewProductsUsecase(productsRepository domain.ProductsRepository, imagesRepo
 	return &productsUsecase{productsRepository: productsRepository, imagesRepository: imagesRepository, contextTimeout: contextTimeout}
 }
 
-func (pu *productsUsecase) Product(c context.Context, id string) (*web.ProductsResponse, error) {
+func (pu *productsUsecase) Product(c context.Context, id string) (*web.ProductResponse, error) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, errors.New("invalid id")
@@ -32,7 +32,7 @@ func (pu *productsUsecase) Product(c context.Context, id string) (*web.ProductsR
 
 	image := pu.imagesRepository.GetDataById(c, product.ImagesId)
 
-	response := &web.ProductsResponse{
+	response := &web.ProductResponse{
 		Id:              strconv.Itoa(product.Id),
 		ProductName:     product.Name,
 		ImageUrl:        image.Url,
@@ -46,4 +46,32 @@ func (pu *productsUsecase) Product(c context.Context, id string) (*web.ProductsR
 	}
 
 	return response, nil
+}
+
+func (pu *productsUsecase) Products(c context.Context) (*web.ProductsResponse, error) {
+	datas := pu.productsRepository.Datas(c)
+
+	var products []*web.ProductResponse
+	product := new(web.ProductResponse)
+
+	for _, item := range datas {
+		image := pu.imagesRepository.GetDataById(c, item.ImagesId)
+
+		product.Id = strconv.Itoa(item.Id)
+		product.ProductName = item.Name
+		product.ImageUrl = image.Url
+		product.Price = item.Price
+		product.Description = item.Description
+		product.Rating = item.Ratings
+		product.Category = item.Category
+		product.Stock = item.Stock
+		product.NumberOfReviews = item.NumOfReviews
+
+		products = append(products, product)
+	}
+
+	return &web.ProductsResponse{
+		Message:  "success",
+		Products: products,
+	}, nil
 }

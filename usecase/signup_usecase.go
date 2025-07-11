@@ -14,19 +14,43 @@ import (
 )
 
 type signupUsecase struct {
-	userRepository domain.UserRepository
-	contextTimeout time.Duration
+	userRepository   domain.UserRepository
+	avatarRepository domain.AvatarRepository
+	contextTimeout   time.Duration
 }
 
-func NewSignupUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.SignupUsecase {
-	return &signupUsecase{userRepository: userRepository, contextTimeout: contextTimeout}
+func NewSignupUsecase(userRepository domain.UserRepository, avatarRepository domain.AvatarRepository, contextTimeout time.Duration) web.SignupUsecase {
+	return &signupUsecase{
+		userRepository:   userRepository,
+		avatarRepository: avatarRepository,
+		contextTimeout:   contextTimeout,
+	}
 }
 
-func (su *signupUsecase) Create(c context.Context, user *domain.User) error {
+func (su *signupUsecase) Create(c context.Context, user *domain.User, avatarUrl string) error {
+	now := time.Now()
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
 	defer cancel()
 
-	return su.userRepository.Create(ctx, user)
+	err := su.userRepository.Create(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	avatar := &domain.Avatar{
+		UserId: user.Id,
+		Url:    avatarUrl,
+	}
+	err = su.avatarRepository.Create(ctx, avatar)
+	if err != nil {
+		return err
+	}
+
+	return su.userRepository.Update(ctx, &domain.User{
+		Id:        user.Id,
+		AvatarId:  avatar.Id,
+		UpdatedAt: &now,
+	})
 }
 
 func (su *signupUsecase) GetUserByEmail(c context.Context, email string) (*domain.User, error) {
@@ -52,7 +76,7 @@ func (su *signupUsecase) UploadAvatar(env *bootstrap.Env, fileHeader *multipart.
 		panic(err)
 	}
 
-	url := ""
+	url := env.CloudinaryUrl
 
 	cloudinary, err := curl.Curl[*domain.ResponseCloudinary]("POST", url, nil, nil, map[string]string{
 		"file":      fileUpload,

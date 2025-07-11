@@ -30,3 +30,12 @@ func (p *ProductsController) Product(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(response)
 }
+
+func (p *ProductsController) Products(c *fiber.Ctx) error {
+	response, err := p.ProductsUsecase.Products(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}

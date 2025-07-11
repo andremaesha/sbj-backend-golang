@@ -9,6 +9,11 @@ type ProductsRequest struct {
 }
 
 type ProductsResponse struct {
+	Message  string             `json:"message,omitempty"`
+	Products []*ProductResponse `json:"products,omitempty"`
+}
+
+type ProductResponse struct {
 	Id              string  `json:"id,omitempty"`
 	ProductName     string  `json:"product_name,omitempty"`
 	ImageUrl        string  `json:"image_url,omitempty"`
@@ -22,5 +27,6 @@ type ProductsResponse struct {
 }
 
 type ProductsUsecase interface {
-	Product(c context.Context, id string) (*ProductsResponse, error)
+	Product(c context.Context, id string) (*ProductResponse, error)
+	Products(c context.Context) (*ProductsResponse, error)
 }

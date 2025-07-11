@@ -27,7 +27,7 @@ type UploadAvatarResponse struct {
 }
 
 type SignupUsecase interface {
-	Create(c context.Context, user *domain.User) error
+	Create(c context.Context, user *domain.User, avatarUrl string) error
 	GetUserByEmail(c context.Context, email string) (*domain.User, error)
 	UploadAvatar(env *bootstrap.Env, fileHeader *multipart.FileHeader) (*domain.ResponseCloudinary, error)
 }
