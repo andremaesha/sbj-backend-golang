@@ -19,6 +19,7 @@ type LoginResponse struct {
 type LoginUsecase interface {
 	GetUserByEmail(c context.Context, email string) (*domain.User, error)
 	ValidateUserVerified(verified bool) error
+	ValidateUserCredentials(userPassword, requestPassword string) error
 	SetSession(c context.Context, expire int, idSession string, data *domain.User) error
 	EncryptSession(key, data string) string
 }

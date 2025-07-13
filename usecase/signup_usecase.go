@@ -9,6 +9,7 @@ import (
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
 	"sbj-backend/internal/curl"
+	"sbj-backend/internal/encry"
 	"sbj-backend/internal/helpers"
 	"time"
 )
@@ -57,6 +58,22 @@ func (su *signupUsecase) GetUserByEmail(c context.Context, email string) (*domai
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)
 	defer cancel()
 	return su.userRepository.GetByEmail(ctx, email)
+}
+
+func (su *signupUsecase) CreateUser(c context.Context, request *web.SignupRequest) error {
+	encryptedPassword, err := encry.HashPassword(request.Password)
+	if err != nil {
+		return err
+	}
+
+	user := &domain.User{
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
+		Email:     request.Email,
+		Password:  encryptedPassword,
+	}
+
+	return su.Create(c, user, request.Avatar)
 }
 
 func (su *signupUsecase) UploadAvatar(env *bootstrap.Env, fileHeader *multipart.FileHeader) (*domain.ResponseCloudinary, error) {

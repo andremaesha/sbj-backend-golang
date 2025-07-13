@@ -7,7 +7,6 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
-	"sbj-backend/internal/encry"
 	"time"
 )
 
@@ -30,8 +29,9 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "user not found with the given email"})
 	}
 
-	if !encry.VerifyPassword(user.Password, request.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
+	err = lc.LoginUsecase.ValidateUserCredentials(user.Password, request.Password)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: err.Error()})
 	}
 
 	err = lc.LoginUsecase.ValidateUserVerified(user.Verified)

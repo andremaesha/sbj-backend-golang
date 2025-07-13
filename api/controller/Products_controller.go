@@ -17,9 +17,10 @@ type ProductsController struct {
 func (p *ProductsController) Product(c *fiber.Ctx) error {
 	id := c.Query("id")
 
-	if id == "" {
+	err := p.ProductsUsecase.ValidateProductId(id)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{
-			Message: "id parameter is required",
+			Message: err.Error(),
 		})
 	}
 

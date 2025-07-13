@@ -29,4 +29,5 @@ type ProductResponse struct {
 type ProductsUsecase interface {
 	Product(c context.Context, id string) (*ProductResponse, error)
 	Products(c context.Context) (*ProductsResponse, error)
+	ValidateProductId(id string) error
 }

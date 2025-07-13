@@ -6,7 +6,6 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
-	"sbj-backend/internal/encry"
 )
 
 type SignupController struct {
@@ -26,19 +25,7 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).JSON(domain.ErrorResponse{Message: "user already exists with the given email"})
 	}
 
-	encryptedPassword, err := encry.HashPassword(request.Password)
-	if err != nil {
-		panic(err)
-	}
-
-	user := &domain.User{
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
-		Email:     request.Email,
-		Password:  encryptedPassword,
-	}
-
-	err = sc.SignupUsecase.Create(c.Context(), user, request.Avatar)
+	err = sc.SignupUsecase.CreateUser(c.Context(), request)
 	if err != nil {
 		panic(err)
 	}

@@ -75,3 +75,10 @@ func (pu *productsUsecase) Products(c context.Context) (*web.ProductsResponse, e
 		Products: products,
 	}, nil
 }
+
+func (pu *productsUsecase) ValidateProductId(id string) error {
+	if id == "" {
+		return errors.New("id parameter is required")
+	}
+	return nil
+}

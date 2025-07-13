@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
+	"sbj-backend/internal/encry"
 	"sbj-backend/internal/helpers"
 	"time"
 )
@@ -47,4 +48,11 @@ func (lu *loginUsecase) EncryptSession(key, data string) string {
 	}
 
 	return content
+}
+
+func (lu *loginUsecase) ValidateUserCredentials(userPassword, requestPassword string) error {
+	if !encry.VerifyPassword(userPassword, requestPassword) {
+		return errors.New("invalid credentials")
+	}
+	return nil
 }
