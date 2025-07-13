@@ -29,6 +29,10 @@ func (ur *userRepository) Create(ctx context.Context, user *domain.User) error {
 	return table.InsertOne(ctx, user)
 }
 
+func (ur *userRepository) Update(ctx context.Context, user *domain.User) error {
+	return ur.database.Table(ur.table).UpdateOne(ctx, user)
+}
+
 func (ur *userRepository) SetSession(ctx context.Context, idSession string, user *domain.User) error {
 	table := ur.redis.Table(ur.redisPrefix[0])
 

@@ -5,16 +5,16 @@ import (
 	"github.com/google/uuid"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
-	"sbj-backend/internal/encry"
+	"sbj-backend/domain/web"
 )
 
 type SignupController struct {
-	SignupUsecase domain.SignupUsecase
+	SignupUsecase web.SignupUsecase
 	Env           *bootstrap.Env
 }
 
 func (sc *SignupController) Signup(c *fiber.Ctx) error {
-	request := new(domain.SignupRequest)
+	request := new(web.SignupRequest)
 
 	if c.BodyParser(request) != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
@@ -25,24 +25,12 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).JSON(domain.ErrorResponse{Message: "user already exists with the given email"})
 	}
 
-	encryptedPassword, err := encry.HashPassword(request.Password)
+	err = sc.SignupUsecase.CreateUser(c.Context(), request)
 	if err != nil {
 		panic(err)
 	}
 
-	user := &domain.User{
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
-		Email:     request.Email,
-		Password:  encryptedPassword,
-	}
-
-	err = sc.SignupUsecase.Create(c.Context(), user)
-	if err != nil {
-		panic(err)
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(domain.SignupResponse{
+	return c.Status(fiber.StatusCreated).JSON(web.SignupResponse{
 		Message: "success",
 	})
 }
@@ -62,7 +50,7 @@ func (sc *SignupController) UploadAvatar(c *fiber.Ctx) error {
 		panic(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(domain.UploadAvatarResponse{
+	return c.Status(fiber.StatusOK).JSON(web.UploadAvatarResponse{
 		Id:        idFile,
 		Filename:  newFileName,
 		UrlAvatar: responseCloudinary.SecureUrl,

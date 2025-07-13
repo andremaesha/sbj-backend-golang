@@ -2,7 +2,10 @@ package usecase
 
 import (
 	"context"
+	"errors"
+	"github.com/gofiber/fiber/v2"
 	"sbj-backend/domain"
+	"sbj-backend/domain/web"
 	"sbj-backend/internal/helpers"
 	"time"
 )
@@ -12,7 +15,7 @@ type LogoutUsecase struct {
 	contextTimeout time.Duration
 }
 
-func NewLogoutUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) domain.LogoutUsecase {
+func NewLogoutUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.LogoutUsecase {
 	return &LogoutUsecase{userRepository: userRepository, contextTimeout: contextTimeout}
 }
 
@@ -28,4 +31,22 @@ func (lu *LogoutUsecase) DecryptSession(key, data string) string {
 	}
 
 	return content
+}
+
+func (lu *LogoutUsecase) ValidateSession(sessionId string) error {
+	if sessionId == "" {
+		return errors.New("session not found")
+	}
+	return nil
+}
+
+func (lu *LogoutUsecase) CreateExpiredCookie() *fiber.Cookie {
+	return &fiber.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Expires:  time.Now(),
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Strict",
+	}
 }

@@ -2,7 +2,6 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/api/controller"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
@@ -13,10 +12,11 @@ import (
 	"time"
 )
 
-func NewSignupRouter(env *bootstrap.Env, session *session.Store, timeout time.Duration, db psql.Database, redis redis.Database, f fiber.Router) {
+func NewSignupRouter(env *bootstrap.Env, timeout time.Duration, db psql.Database, redis redis.Database, f fiber.Router) {
 	ur := repository.NewUserRepository(db, redis, domain.TableUser)
+	ar := repository.NewAvatarRepository(db, domain.TableAvatar)
 	sc := controller.SignupController{
-		SignupUsecase: usecase.NewSignupUsecase(ur, timeout),
+		SignupUsecase: usecase.NewSignupUsecase(ur, ar, timeout),
 		Env:           env,
 	}
 

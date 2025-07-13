@@ -16,11 +16,13 @@ type User struct {
 	Password  string     `gorm:"not null"`
 	AvatarId  int        `gorm:"default:NULL"`
 	Role      string     `gorm:"default:'user'" redis:"role"`
-	CreatedAt *time.Time `gorm:"default:NULL"`
+	CreatedAt *time.Time `gorm:"default:now()"`
+	UpdatedAt *time.Time `gorm:"default:NULL"`
 }
 
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
+	Update(ctx context.Context, user *User) error
 	GetByEmail(c context.Context, email string) (*User, error)
 	SetExpire(expire int)
 	SetSession(ctx context.Context, idSession string, user *User) error

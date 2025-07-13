@@ -4,12 +4,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/bootstrap"
-	"sbj-backend/domain"
-	"time"
+	"sbj-backend/domain/web"
 )
 
 type LogoutController struct {
-	LogoutUsecase domain.LogoutUsecase
+	LogoutUsecase web.LogoutUsecase
 	Env           *bootstrap.Env
 	Session       *session.Store
 }
@@ -17,29 +16,24 @@ type LogoutController struct {
 func (lc *LogoutController) Logout(c *fiber.Ctx) error {
 	sessionId := c.Cookies("session_id")
 	println(sessionId)
-	if sessionId == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(&domain.LogoutResponse{
-			Message: "session not found",
+
+	err := lc.LogoutUsecase.ValidateSession(sessionId)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(&web.LogoutResponse{
+			Message: err.Error(),
 		})
 	}
 
 	content := lc.LogoutUsecase.DecryptSession(lc.Env.Key, sessionId)
 
-	err := lc.LogoutUsecase.DeleteSession(c.Context(), content)
+	err = lc.LogoutUsecase.DeleteSession(c.Context(), content)
 	if err != nil {
 		panic(err)
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "session_id",
-		Value:    "",
-		Expires:  time.Now(),
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Strict",
-	})
+	c.Cookie(lc.LogoutUsecase.CreateExpiredCookie())
 
-	return c.Status(fiber.StatusOK).JSON(domain.LogoutResponse{
+	return c.Status(fiber.StatusOK).JSON(web.LogoutResponse{
 		Message: "Logout successful",
 	})
 }

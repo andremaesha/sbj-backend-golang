@@ -6,18 +6,18 @@ import (
 	"github.com/google/uuid"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
-	"sbj-backend/internal/encry"
+	"sbj-backend/domain/web"
 	"time"
 )
 
 type LoginController struct {
-	LoginUsecase domain.LoginUsecase
+	LoginUsecase web.LoginUsecase
 	Env          *bootstrap.Env
 	Session      *session.Store
 }
 
 func (lc *LoginController) Login(c *fiber.Ctx) error {
-	request := new(domain.LoginRequest)
+	request := new(web.LoginRequest)
 	sessionId := uuid.New().String()
 
 	if c.BodyParser(request) != nil {
@@ -29,8 +29,9 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "user not found with the given email"})
 	}
 
-	if !encry.VerifyPassword(user.Password, request.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: "invalid credentials"})
+	err = lc.LoginUsecase.ValidateUserCredentials(user.Password, request.Password)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: err.Error()})
 	}
 
 	err = lc.LoginUsecase.ValidateUserVerified(user.Verified)
@@ -54,7 +55,7 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 		SameSite: "Strict",
 	})
 
-	return c.Status(fiber.StatusOK).JSON(domain.LoginResponse{
+	return c.Status(fiber.StatusOK).JSON(web.LoginResponse{
 		Id:      encryptSession,
 		Email:   user.Email,
 		Message: "success",
