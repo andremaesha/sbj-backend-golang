@@ -15,7 +15,6 @@ type LogoutController struct {
 
 func (lc *LogoutController) Logout(c *fiber.Ctx) error {
 	sessionId := c.Cookies("session_id")
-	println(sessionId)
 
 	err := lc.LogoutUsecase.ValidateSession(sessionId)
 	if err != nil {

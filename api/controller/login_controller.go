@@ -7,6 +7,7 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
+	"sbj-backend/internal/validator"
 	"time"
 )
 
@@ -22,6 +23,11 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 
 	if c.BodyParser(request) != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
+	}
+
+	// Validate request
+	if err := validator.ValidateStruct(request); err != nil {
+		return validator.HandleValidationErrors(c, err)
 	}
 
 	user, err := lc.LoginUsecase.GetUserByEmail(c.Context(), request.Email)

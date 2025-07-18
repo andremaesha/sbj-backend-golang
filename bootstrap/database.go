@@ -3,11 +3,16 @@ package bootstrap
 import (
 	"context"
 	"log"
-	"sbj-backend/psql"
+	"os"
 	"time"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/plugin/dbresolver"
 )
 
-func NewPsql(env *Env) psql.Client {
+func NewPsql(env *Env) *gorm.DB {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -19,30 +24,55 @@ func NewPsql(env *Env) psql.Client {
 		env.DBName,
 	)
 
-	client, err := psql.NewClient(config)
+	db, err := gorm.Open(postgres.Open(config), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold: 500 * time.Millisecond,
+			},
+		),
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	err = client.Ping(ctx)
+	err = db.Use(
+		dbresolver.
+			Register(dbresolver.Config{}).
+			SetMaxIdleConns(10).
+			SetMaxOpenConns(50),
+	)
 	if err != nil {
 		panic(err)
 	}
 
-	err = client.Ping(ctx)
+	// Ping the database
+	sqlDB, err := db.DB()
 	if err != nil {
 		panic(err)
 	}
 
-	return client
+	err = sqlDB.PingContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }
 
-func ClosePsqlConnection(client psql.Client) {
-	if client == nil {
+func ClosePsqlConnection(db *gorm.DB) {
+	if db == nil {
 		return
 	}
 
-	err := client.Disconnect()
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	err = sqlDB.Close()
 	if err != nil {
 		panic(err)
 	}

@@ -6,22 +6,21 @@ import (
 	"gorm.io/gorm"
 	"sbj-backend/domain"
 	errCus "sbj-backend/domain/errors"
-	"sbj-backend/psql"
 )
 
 type productsRepository struct {
-	database psql.Database
-	table    string
+	db    *gorm.DB
+	table string
 }
 
-func NewProductsRepository(database psql.Database, table string) domain.ProductsRepository {
-	return &productsRepository{database: database, table: table}
+func NewProductsRepository(db *gorm.DB, table string) domain.ProductsRepository {
+	return &productsRepository{db: db, table: table}
 }
 
 func (pr *productsRepository) GetDataById(c context.Context, id int) (*domain.Product, error) {
 	result := new(domain.Product)
 
-	err := pr.database.Table(pr.table).FindOne(c, result, "id = ? AND is_active = ?", id, true)
+	err := pr.db.WithContext(c).Table(pr.table).Where("id = ? AND is_active = ?", id, true).First(result).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errCus.ErrDataNotFound
@@ -36,10 +35,18 @@ func (pr *productsRepository) GetDataById(c context.Context, id int) (*domain.Pr
 func (pr *productsRepository) Datas(c context.Context) []*domain.Product {
 	var results []*domain.Product
 
-	err := pr.database.Table(pr.table).Find(c, &results, "is_active = ?", true).Error
+	err := pr.db.WithContext(c).Table(pr.table).Where("is_active = ?", true).Find(&results).Error
 	if err != nil {
-		panic(err())
+		panic(err)
 	}
 
 	return results
+}
+
+func (pr *productsRepository) Create(c context.Context, product *domain.Product) error {
+	return pr.db.WithContext(c).Table(pr.table).Create(product).Error
+}
+
+func (pr *productsRepository) Update(c context.Context, product *domain.Product) error {
+	return pr.db.WithContext(c).Table(pr.table).Updates(product).Error
 }

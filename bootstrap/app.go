@@ -1,26 +1,26 @@
 package bootstrap
 
 import (
-	"sbj-backend/psql"
-	"sbj-backend/redis"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type Application struct {
 	Env   *Env
-	Psql  psql.Client
-	Redis redis.Client
+	DB    *gorm.DB
+	Redis *redis.Client
 }
 
 func App() *Application {
 	app := &Application{}
 	app.Env = NewEnv()
-	app.Psql = NewPsql(app.Env)
-	app.Redis = NewRedis(app.Env)
+	app.DB = NewPsql(app.Env)
+	app.Redis = NewRedisClient(app.Env)
 
 	return app
 }
 
 func (app *Application) CloseDBConnection() {
-	ClosePsqlConnection(app.Psql)
+	ClosePsqlConnection(app.DB)
 	CloseRedisConnection(app.Redis)
 }
