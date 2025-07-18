@@ -2,21 +2,24 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"sbj-backend/domain"
-	"sbj-backend/psql"
-	"sbj-backend/redis"
+	"strconv"
+	"time"
 )
 
 type userRepository struct {
-	database    psql.Database
-	redis       redis.Database
+	db          *gorm.DB
+	redis       *redis.Client
 	table       string
 	redisPrefix []string
 	expire      int
 }
 
-func NewUserRepository(database psql.Database, redis redis.Database, table string, redisPrefix ...string) domain.UserRepository {
-	return &userRepository{database: database, redis: redis, table: table, redisPrefix: redisPrefix}
+func NewUserRepository(db *gorm.DB, redisClient *redis.Client, table string, redisPrefix ...string) domain.UserRepository {
+	return &userRepository{db: db, redis: redisClient, table: table, redisPrefix: redisPrefix}
 }
 
 func (ur *userRepository) SetExpire(expire int) {
@@ -24,31 +27,71 @@ func (ur *userRepository) SetExpire(expire int) {
 }
 
 func (ur *userRepository) Create(ctx context.Context, user *domain.User) error {
-	table := ur.database.Table(ur.table)
-
-	return table.InsertOne(ctx, user)
+	return ur.db.WithContext(ctx).Table(ur.table).Create(user).Error
 }
 
 func (ur *userRepository) Update(ctx context.Context, user *domain.User) error {
-	return ur.database.Table(ur.table).UpdateOne(ctx, user)
+	return ur.db.WithContext(ctx).Table(ur.table).Updates(user).Error
+}
+
+func (ur *userRepository) GetSession(ctx context.Context, idSession string) (*domain.User, error) {
+	prefix := ur.redisPrefix[0]
+	key := prefix + idSession
+
+	data, err := ur.redis.HGetAll(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if data is empty
+	if len(data) == 0 {
+		return nil, fmt.Errorf("session not found")
+	}
+
+	var user domain.User
+
+	// Map Redis hash fields to User struct
+	if id, exists := data["user_id"]; exists {
+		if parsedId, err2 := strconv.Atoi(id); err2 == nil {
+			user.Id = parsedId
+		}
+	}
+
+	if email, exists := data["email"]; exists {
+		user.Email = email
+	}
+
+	if role, exists := data["role"]; exists {
+		user.Role = role
+	}
+
+	return &user, nil
 }
 
 func (ur *userRepository) SetSession(ctx context.Context, idSession string, user *domain.User) error {
-	table := ur.redis.Table(ur.redisPrefix[0])
+	prefix := ur.redisPrefix[0]
+	key := prefix + idSession
+	timeExpire := time.Minute * time.Duration(ur.expire)
 
-	return table.HashSet(ctx, ur.expire, idSession, user)
+	err := ur.redis.HSet(ctx, key, user).Err()
+	if err != nil {
+		return err
+	}
+
+	return ur.redis.Expire(ctx, key, timeExpire).Err()
 }
 
 func (ur *userRepository) DeleteSession(ctx context.Context, idSession string) (int64, error) {
-	table := ur.redis.Table(ur.redisPrefix[0])
+	prefix := ur.redisPrefix[0]
+	key := prefix + idSession
 
-	return table.Del(ctx, idSession)
+	return ur.redis.Del(ctx, key).Result()
 }
 
 func (ur *userRepository) GetByEmail(c context.Context, email string) (*domain.User, error) {
 	result := new(domain.User)
 
-	err := ur.database.Table(ur.table).FindOne(c, result, "email = ?", email)
+	err := ur.db.WithContext(c).Table(ur.table).Where("email = ?", email).First(result).Error
 	if err != nil {
 		return nil, err
 	}

@@ -2,19 +2,19 @@ package repository
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"sbj-backend/domain"
-	"sbj-backend/psql"
 )
 
 type avatarRepository struct {
-	database psql.Database
-	table    string
+	db    *gorm.DB
+	table string
 }
 
-func NewAvatarRepository(database psql.Database, table string) domain.AvatarRepository {
-	return &avatarRepository{database: database, table: table}
+func NewAvatarRepository(db *gorm.DB, table string) domain.AvatarRepository {
+	return &avatarRepository{db: db, table: table}
 }
 
 func (repo *avatarRepository) Create(ctx context.Context, avatar *domain.Avatar) error {
-	return repo.database.Table(repo.table).InsertOne(ctx, avatar)
+	return repo.db.WithContext(ctx).Table(repo.table).Create(avatar).Error
 }

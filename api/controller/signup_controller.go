@@ -6,6 +6,7 @@ import (
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
+	"sbj-backend/internal/validator"
 )
 
 type SignupController struct {
@@ -16,8 +17,13 @@ type SignupController struct {
 func (sc *SignupController) Signup(c *fiber.Ctx) error {
 	request := new(web.SignupRequest)
 
-	if c.BodyParser(request) != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with you're json body"})
+	if err := c.BodyParser(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with your json body"})
+	}
+
+	// Validate request
+	if err := validator.ValidateStruct(request); err != nil {
+		return validator.HandleValidationErrors(c, err)
 	}
 
 	_, err := sc.SignupUsecase.GetUserByEmail(c.Context(), request.Email)

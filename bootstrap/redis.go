@@ -2,12 +2,12 @@ package bootstrap
 
 import (
 	"context"
+	"github.com/redis/go-redis/v9"
 	"log"
-	"sbj-backend/redis"
 	"time"
 )
 
-func NewRedis(env *Env) redis.Client {
+func NewRedisClient(env *Env) *redis.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -16,12 +16,14 @@ func NewRedis(env *Env) redis.Client {
 	password := env.RedisPassword
 	db := env.RedisDB
 
-	client, err := redis.NewClient(addr, username, password, db)
-	if err != nil {
-		panic(err)
-	}
+	client := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Username: username,
+		Password: password,
+		DB:       db,
+	})
 
-	err = client.Ping(ctx)
+	err := client.Ping(ctx).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -29,12 +31,12 @@ func NewRedis(env *Env) redis.Client {
 	return client
 }
 
-func CloseRedisConnection(client redis.Client) {
+func CloseRedisConnection(client *redis.Client) {
 	if client == nil {
 		return
 	}
 
-	err := client.Disconnect()
+	err := client.Close()
 	if err != nil {
 		panic(err)
 	}

@@ -13,7 +13,6 @@ type Product struct {
 	Price        float64    `gorm:"default:0"`
 	Description  string     `gorm:"type:text"`
 	Ratings      float64    `gorm:"default:null"`
-	ImagesId     int        `gorm:"not null"`
 	Category     string     `gorm:"default:null"`
 	Stock        int        `gorm:"default:0"`
 	NumOfReviews int        `gorm:"default:0"`
@@ -28,4 +27,6 @@ type Product struct {
 type ProductsRepository interface {
 	GetDataById(c context.Context, id int) (*Product, error)
 	Datas(c context.Context) []*Product
+	Create(c context.Context, product *Product) error
+	Update(c context.Context, product *Product) error
 }

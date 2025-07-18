@@ -2,35 +2,30 @@ package repository
 
 import (
 	"context"
+	"gorm.io/gorm"
 	"sbj-backend/domain"
-	"sbj-backend/psql"
 )
 
 type imagesRepository struct {
-	database psql.Database
-	table    string
+	db    *gorm.DB
+	table string
 }
 
-func NewImagesRepository(database psql.Database, table string) domain.ImagesRepository {
-	return &imagesRepository{database: database, table: table}
+func NewImagesRepository(db *gorm.DB, table string) domain.ImagesRepository {
+	return &imagesRepository{db: db, table: table}
 }
 
-func (ir *imagesRepository) GetDataById(ctx context.Context, id int) *domain.Images {
-	result := new(domain.Images)
+func (ir *imagesRepository) GetDataByProductsId(ctx context.Context, id int) []*domain.Images {
+	var results []*domain.Images
 
-	err := ir.database.Table(ir.table).FindOne(ctx, result, "id = ?", id)
+	err := ir.db.WithContext(ctx).Table(ir.table).Where("products_id = ?", id).Find(&results).Error
 	if err != nil {
 		panic(err)
 	}
 
-	return result
+	return results
 }
 
 func (ir *imagesRepository) Create(ctx context.Context, image *domain.Images) error {
-	err := ir.database.Table(ir.table).InsertOne(ctx, image)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ir.db.WithContext(ctx).Table(ir.table).Create(image).Error
 }

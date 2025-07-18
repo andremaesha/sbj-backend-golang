@@ -25,6 +25,7 @@ type UserRepository interface {
 	Update(ctx context.Context, user *User) error
 	GetByEmail(c context.Context, email string) (*User, error)
 	SetExpire(expire int)
+	GetSession(ctx context.Context, idSession string) (*User, error)
 	SetSession(ctx context.Context, idSession string, user *User) error
 	DeleteSession(ctx context.Context, idSession string) (int64, error)
 }
