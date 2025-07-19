@@ -6,14 +6,37 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"sbj-backend/bootstrap"
+	"sbj-backend/domain"
+	"sbj-backend/internal/middlewares"
+	"sbj-backend/repository"
+	"sbj-backend/usecase"
 	"time"
 )
 
 func Setup(env *bootstrap.Env, session *session.Store, timeout time.Duration, db *gorm.DB, redis *redis.Client, f *fiber.App) {
+	// Initialize user repository for auth middleware
+	userRepo := repository.NewUserRepository(db, redis, domain.TableUser, "session:")
+
+	// Initialize auth usecase
+	authUsecase := usecase.NewAuthUsecase(userRepo, timeout)
+
+	// Public routes - no authentication required
 	publicRouter := f.Group("/api/v1")
 	NewSignupRouter(env, timeout, db, redis, publicRouter)
 	NewLoginRouter(env, session, timeout, db, redis, publicRouter)
 	NewLogoutRouter(env, session, timeout, db, redis, publicRouter)
 
-	NewProductsRouter(env, session, timeout, db, redis, publicRouter)
+	// Setup public product routes
+	SetupPublicProductRoutes(env, session, timeout, db, redis, publicRouter)
+
+	// Protected routes - authentication required
+	protectedRouter := f.Group("/api/v1")
+	protectedRouter.Use(middlewares.AuthMiddleware(env, session, authUsecase))
+
+	// Admin routes - admin role required
+	adminRouter := protectedRouter.Group("")
+	adminRouter.Use(middlewares.AdminRoleMiddleware())
+
+	// Setup admin product routes
+	SetupAdminProductRoutes(env, session, timeout, db, redis, adminRouter)
 }

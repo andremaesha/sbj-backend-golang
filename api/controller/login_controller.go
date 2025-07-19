@@ -62,7 +62,6 @@ func (lc *LoginController) Login(c *fiber.Ctx) error {
 	})
 
 	return c.Status(fiber.StatusOK).JSON(web.LoginResponse{
-		Id:      encryptSession,
 		Email:   user.Email,
 		Message: "success",
 	})
