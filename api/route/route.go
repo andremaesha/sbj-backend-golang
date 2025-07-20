@@ -16,9 +16,11 @@ import (
 func Setup(env *bootstrap.Env, session *session.Store, timeout time.Duration, db *gorm.DB, redis *redis.Client, f *fiber.App) {
 	// Initialize user repository for auth middleware
 	userRepo := repository.NewUserRepository(db, redis, domain.TableUser, "session:")
+	lookupRepository := repository.NewReffLookupRepository(db, domain.TableReffLookup)
+	whitelistIpRepository := repository.NewWhitelistIpRepository(db, domain.TableWhitelistIP)
 
 	// Initialize auth usecase
-	authUsecase := usecase.NewAuthUsecase(userRepo, timeout)
+	authUsecase := usecase.NewAuthUsecase(userRepo, lookupRepository, whitelistIpRepository, timeout)
 
 	// Public routes - no authentication required
 	publicRouter := f.Group("/api/v1")

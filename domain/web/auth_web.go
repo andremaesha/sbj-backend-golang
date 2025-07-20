@@ -12,4 +12,5 @@ type AuthUsecase interface {
 
 	// DecryptSessionID decrypts a session cookie to get the session ID
 	DecryptSessionID(key, sessionCookie string) (string, error)
+	IpSetting(ctx context.Context, ip string) error
 }

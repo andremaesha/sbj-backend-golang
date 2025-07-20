@@ -19,6 +19,13 @@ func AuthMiddleware(env *bootstrap.Env, session *session.Store, authUsecase web.
 			})
 		}
 
+		err := authUsecase.IpSetting(c.Context(), c.IP())
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{
+				Message: err.Error(),
+			})
+		}
+
 		// Decrypt session ID using auth usecase
 		sessionID, err := authUsecase.DecryptSessionID(env.Key, sessionCookie)
 		if err != nil {

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
 	"sbj-backend/internal/helpers"
@@ -9,15 +10,19 @@ import (
 )
 
 type authUsecase struct {
-	userRepository domain.UserRepository
-	contextTimeout time.Duration
+	userRepository        domain.UserRepository
+	reffLookupRepository  domain.ReffLookupRepository
+	whitelistIpRepository domain.WhitelistIpRepository
+	contextTimeout        time.Duration
 }
 
 // NewAuthUsecase creates a new auth usecase
-func NewAuthUsecase(userRepository domain.UserRepository, contextTimeout time.Duration) web.AuthUsecase {
+func NewAuthUsecase(userRepository domain.UserRepository, reffLookupRepository domain.ReffLookupRepository, whitelistIpRepository domain.WhitelistIpRepository, contextTimeout time.Duration) web.AuthUsecase {
 	return &authUsecase{
-		userRepository: userRepository,
-		contextTimeout: contextTimeout,
+		userRepository:        userRepository,
+		reffLookupRepository:  reffLookupRepository,
+		whitelistIpRepository: whitelistIpRepository,
+		contextTimeout:        contextTimeout,
 	}
 }
 
@@ -32,4 +37,22 @@ func (au *authUsecase) GetUserFromSession(ctx context.Context, sessionID string)
 // DecryptSessionID decrypts a session cookie to get the session ID
 func (au *authUsecase) DecryptSessionID(key, sessionCookie string) (string, error) {
 	return helpers.DecryptAES(sessionCookie, key)
+}
+
+func (au *authUsecase) IpSetting(ctx context.Context, ip string) error {
+	isIp, err := au.reffLookupRepository.GetDataByGroup(ctx, "ip_setting")
+	if err != nil {
+		panic(err)
+	}
+
+	if len(isIp) == 0 || isIp[0].LookupValue == "0" {
+		return nil
+	}
+
+	ipData, err := au.whitelistIpRepository.GetDataByIp(ctx, ip)
+	if err != nil || ipData.Ip != ip || !ipData.IsActive {
+		return fmt.Errorf("ip %s not authorized", ip)
+	}
+
+	return nil
 }
