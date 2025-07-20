@@ -42,7 +42,9 @@ func NewPsql(env *Env) *gorm.DB {
 		dbresolver.
 			Register(dbresolver.Config{}).
 			SetMaxIdleConns(10).
-			SetMaxOpenConns(50),
+			SetMaxOpenConns(50).
+			SetConnMaxLifetime(time.Hour).
+			SetConnMaxIdleTime(30 * time.Minute),
 	)
 	if err != nil {
 		panic(err)

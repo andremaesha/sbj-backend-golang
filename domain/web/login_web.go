@@ -11,7 +11,6 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Id      string `json:"id"`
 	Email   string `json:"email"`
 	Message string `json:"message"`
 }
