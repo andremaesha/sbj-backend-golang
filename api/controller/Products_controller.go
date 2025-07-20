@@ -42,25 +42,18 @@ func (p *ProductsController) Products(c *fiber.Ctx) error {
 }
 
 func (p *ProductsController) CreateProduct(c *fiber.Ctx) error {
-	sessionId := c.Cookies("session_id")
-
-	err := p.ProductsUsecase.ValidatePermission(c.Context(), p.Env.Key, sessionId)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Message: err.Error()})
-	}
-
 	request := new(web.ProductRequest)
 
-	if err = c.BodyParser(request); err != nil {
+	if err := c.BodyParser(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error with your json body"})
 	}
 
 	// Validate request
-	if err = validator.ValidateStruct(request); err != nil {
+	if err := validator.ValidateStruct(request); err != nil {
 		return validator.HandleValidationErrors(c, err)
 	}
 
-	err = p.ProductsUsecase.ProductCreate(c.Context(), p.Env, request)
+	err := p.ProductsUsecase.ProductCreate(c.Context(), p.Env, request)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: err.Error()})
 	}
