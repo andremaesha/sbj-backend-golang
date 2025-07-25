@@ -62,3 +62,23 @@ func (p *ProductsController) CreateProduct(c *fiber.Ctx) error {
 		ResponseMessage: "Product created successfully",
 	})
 }
+
+func (p *ProductsController) ProductImages(c *fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		println(err.Error())
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "error parsing form"})
+	}
+
+	files := form.File["files"]
+	if len(files) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: "no files uploaded"})
+	}
+
+	response, err := p.ProductsUsecase.UploadImages(p.Env, files)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}
