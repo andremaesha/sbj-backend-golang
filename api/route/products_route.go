@@ -44,4 +44,5 @@ func SetupAdminProductRoutes(env *bootstrap.Env, session *session.Store, timeout
 
 	// Admin-only routes - require admin role
 	f.Post("/product", pc.CreateProduct)
+	f.Post("/product/images", pc.ProductImages)
 }

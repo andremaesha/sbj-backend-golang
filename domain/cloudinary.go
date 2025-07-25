@@ -10,8 +10,10 @@ type RequestFormDataCloudinary struct {
 }
 
 type ResponseCloudinary struct {
-	SecureUrl string                   `json:"secure_url"`
-	Error     *ResponseCloudinaryError `json:"error"`
+	AssetId   string                   `json:"asset_id"`
+	PublicId  string                   `json:"public_id"`
+	SecureUrl string                   `json:"secure_url,omitempty"`
+	Error     *ResponseCloudinaryError `json:"error,omitempty"`
 }
 
 type ResponseCloudinaryError struct {

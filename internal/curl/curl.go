@@ -12,7 +12,7 @@ import (
 )
 
 // Curl Mengirim request JSON atau file (multipart/form-data)
-func Curl[T any](method, url string, headers map[string]string, requestBody any, files map[string]string, responseType T) (T, error) {
+func Curl[T any](method, url string, headers map[string]string, requestBody any, files map[string]string, responseType T) error {
 	var requestBodyBytes *bytes.Buffer
 	var contentType string
 
@@ -23,7 +23,7 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 
 		file, err := os.Open(files["file"])
 		if err != nil {
-			return responseType, fmt.Errorf("failed to open file: %v", err)
+			return fmt.Errorf("failed to open file: %v", err)
 		}
 
 		part, err := writer.CreateFormFile("file", filepath.Base(files["file"]))
@@ -32,12 +32,12 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 			if err != nil {
 				panic(err)
 			}
-			return responseType, fmt.Errorf("failed to create form file: %v", err)
+			return fmt.Errorf("failed to create form file: %v", err)
 		}
 
 		_, err = io.Copy(part, file)
 		if err != nil {
-			return responseType, fmt.Errorf("failed to copy file data: %v", err)
+			return fmt.Errorf("failed to copy file data: %v", err)
 		}
 		err = file.Close()
 		if err != nil {
@@ -60,7 +60,7 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 		if requestBody != nil {
 			jsonData, err := json.Marshal(requestBody)
 			if err != nil {
-				return responseType, fmt.Errorf("failed to encode request body: %v", err)
+				return fmt.Errorf("failed to encode request body: %v", err)
 			}
 			requestBodyBytes.Write(jsonData)
 		}
@@ -70,7 +70,7 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 	// Buat HTTP request
 	req, err := http.NewRequest(method, url, requestBodyBytes)
 	if err != nil {
-		return responseType, fmt.Errorf("failed to create request: %v", err)
+		return fmt.Errorf("failed to create request: %v", err)
 	}
 
 	// Set headers
@@ -83,7 +83,7 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return responseType, fmt.Errorf("failed to make request: %v", err)
+		return fmt.Errorf("failed to make request: %v", err)
 	}
 	defer func(Body io.ReadCloser) {
 		err = Body.Close()
@@ -96,14 +96,14 @@ func Curl[T any](method, url string, headers map[string]string, requestBody any,
 	body, err := io.ReadAll(resp.Body)
 	println(string(body))
 	if err != nil {
-		return responseType, fmt.Errorf("failed to read response body: %v", err)
+		return fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	// Decode response body ke responseType
 	err = json.Unmarshal(body, &responseType)
 	if err != nil {
-		return responseType, fmt.Errorf("failed to decode response body: %v", err)
+		return fmt.Errorf("failed to decode response body: %v", err)
 	}
 
-	return responseType, nil
+	return nil
 }

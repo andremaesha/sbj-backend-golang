@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"mime/multipart"
+	"os"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
@@ -88,14 +89,19 @@ func (su *signupUsecase) UploadAvatar(env *bootstrap.Env, fileHeader *multipart.
 	signature := helpers.GenerateSH1(formula)
 
 	fileUpload, err := helpers.SaveTempFile(fileHeader, "uploads", "img_", "_backup")
-	println(fileUpload)
 	if err != nil {
 		panic(err)
 	}
 
+	defer func() {
+		if err = os.Remove(fileUpload); err != nil {
+			panic(fmt.Sprintf("Warning: Failed to delete temp file %s: %v\n", fileUpload, err))
+		}
+	}()
+
 	url := env.CloudinaryUrl
 
-	cloudinary, err := curl.Curl[*domain.ResponseCloudinary]("POST", url, nil, nil, map[string]string{
+	err = curl.Curl[*domain.ResponseCloudinary]("POST", url, nil, nil, map[string]string{
 		"file":      fileUpload,
 		"api_key":   env.CloudinaryApiKey,
 		"timestamp": timeStamp,
@@ -107,5 +113,5 @@ func (su *signupUsecase) UploadAvatar(env *bootstrap.Env, fileHeader *multipart.
 		panic(err)
 	}
 
-	return cloudinary, nil
+	return response, nil
 }

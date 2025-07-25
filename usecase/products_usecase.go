@@ -4,9 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
+	"mime/multipart"
+	"os"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
+	"sbj-backend/internal/curl"
 	"sbj-backend/internal/helpers"
 	"strconv"
 	"time"
@@ -154,4 +159,57 @@ func (pu *productsUsecase) ValidatePermission(c context.Context, key, data strin
 	}
 
 	return nil
+}
+
+func (pu *productsUsecase) UploadImages(env *bootstrap.Env, fileHeader []*multipart.FileHeader) (*web.ProductsImagesResponse, error) {
+	var images []*web.ImagesUrl
+
+	timeStamp := fmt.Sprintf("%d", time.Now().Unix())
+	folder := "products"
+
+	for i, file := range fileHeader {
+		// Generate unique public ID untuk setiap file
+		publicId := fmt.Sprintf("%s_%d", uuid.New().String(), i)
+
+		// Generate signature untuk Cloudinary
+		formula := fmt.Sprintf("folder=%s&public_id=%s&timestamp=%s%s", folder, publicId, timeStamp, env.CloudinaryApiSecret)
+		signature := helpers.GenerateSH1(formula)
+
+		// Save file sementara
+		fileUpload, err := helpers.SaveTempFile(file, "uploads", "img_", "_backup")
+		if err != nil {
+			return nil, fmt.Errorf("failed to save temp file: %v", err)
+		}
+
+		url := env.CloudinaryUrl
+		cloudinaryResponse := new(domain.ResponseCloudinary)
+
+		err = curl.Curl[*domain.ResponseCloudinary]("POST", url, nil, nil, map[string]string{
+			"file":      fileUpload,
+			"api_key":   env.CloudinaryApiKey,
+			"timestamp": timeStamp,
+			"signature": signature,
+			"public_id": publicId,
+			"folder":    folder,
+		}, cloudinaryResponse)
+
+		if removeErr := os.Remove(fileUpload); removeErr != nil {
+			panic(fmt.Sprintf("Warning: Failed to delete temp file %s: %v\n", fileUpload, removeErr))
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to upload file %d to cloudinary: %v", i+1, err)
+		}
+
+		images = append(images, &web.ImagesUrl{
+			AssetId:  cloudinaryResponse.AssetId,
+			PublicId: cloudinaryResponse.PublicId,
+			Url:      cloudinaryResponse.SecureUrl,
+		})
+	}
+
+	return &web.ProductsImagesResponse{
+		ImagesUrl:       images,
+		ResponseMessage: "success",
+	}, nil
 }

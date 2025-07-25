@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"mime/multipart"
 	"sbj-backend/bootstrap"
 )
 
@@ -36,8 +37,15 @@ type ProductResponse struct {
 	ResponseMessage string       `json:"response_message,omitempty"`
 }
 
+type ProductsImagesResponse struct {
+	ImagesUrl       []*ImagesUrl `json:"images_url"`
+	ResponseMessage string       `json:"response_message"`
+}
+
 type ImagesUrl struct {
-	Url string `json:"url"`
+	AssetId  string `json:"asset_id"`
+	PublicId string `json:"public_id"`
+	Url      string `json:"url"`
 }
 
 type ProductsUsecase interface {
@@ -46,4 +54,5 @@ type ProductsUsecase interface {
 	ProductCreate(c context.Context, env *bootstrap.Env, request *ProductRequest) error
 	ValidateProductId(id string) error
 	ValidatePermission(c context.Context, key, data string) error
+	UploadImages(env *bootstrap.Env, fileHeader []*multipart.FileHeader) (*ProductsImagesResponse, error)
 }
