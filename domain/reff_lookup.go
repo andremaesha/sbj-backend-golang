@@ -12,7 +12,7 @@ type ReffLookup struct {
 	LookupGroup       string     `gorm:"not null"`
 	LookupValue       string     `gorm:"not null"`
 	LookupDescription string     `gorm:"not null"`
-	CreatedById       int        `gorm:"not null"`
+	CreatedBy         int        `gorm:"not null"`
 	CreatedAt         *time.Time `gorm:"default:now()"`
 	UpdatedBy         string     `gorm:"default:null"`
 	UpdatedAt         *time.Time `gorm:"default:null"`
