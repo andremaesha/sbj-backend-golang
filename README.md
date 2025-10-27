@@ -1,7 +1,3 @@
-Here is a description for your GitHub repository "sbj-backend-golang" in English:
-
----
-
 # sbj-backend-golang
 
 The `sbj-backend-golang` repository is a backend service built using **Go (Golang)**. This project is designed to provide scalable and efficient solutions for handling core business logic, user management, authentication, and database interactions. With a focus on performance and simplicity, it leverages modern Go features and libraries to ensure smooth functionality and maintainability.
