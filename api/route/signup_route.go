@@ -1,15 +1,16 @@
 package route
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"sbj-backend/api/controller"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/repository"
 	"sbj-backend/usecase"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 func NewSignupRouter(env *bootstrap.Env, timeout time.Duration, db *gorm.DB, redis *redis.Client, f fiber.Router) {

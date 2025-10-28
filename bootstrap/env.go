@@ -1,30 +1,32 @@
 package bootstrap
 
 import (
-	"github.com/spf13/viper"
 	"log"
+
+	"github.com/spf13/viper"
 )
 
 type Env struct {
-	AppEnv                   string `mapstructure:"APP_ENV"`
-	ServerAddress            string `mapstructure:"SERVER_ADDRESS"`
-	ContextTimeout           int    `mapstructure:"CONTEXT_TIMEOUT"`
-	DBHost                   string `mapstructure:"DB_HOST"`
-	DBPort                   string `mapstructure:"DB_PORT"`
-	DBUser                   string `mapstructure:"DB_USER"`
-	DBPass                   string `mapstructure:"DB_PASS"`
-	DBName                   string `mapstructure:"DB_NAME"`
-	RedisUser                string `mapstructure:"REDIS_USER"`
-	RedisPassword            string `mapstructure:"REDIS_PASSWORD"`
-	RedisHost                string `mapstructure:"REDIS_HOST"`
-	RedisPort                string `mapstructure:"REDIS_PORT"`
-	RedisDB                  int    `mapstructure:"REDIS_DB"`
-	RedisExpireTime          int    `mapstructure:"REDIS_EXPIRE_TIME"`
-	CloudinaryDefaultProduct string `mapstructure:"CLOUDINARY_DEFAULT_PRODUCT"`
-	CloudinaryUrl            string `mapstructure:"CLOUDINARY_URL"`
-	CloudinaryApiKey         string `mapstructure:"CLOUDINARY_API_KEY"`
-	CloudinaryApiSecret      string `mapstructure:"CLOUDINARY_API_SECRET"`
-	Key                      string `mapstructure:"KEY"`
+	AppEnv                     string `mapstructure:"APP_ENV"`
+	ServerAddress              string `mapstructure:"SERVER_ADDRESS"`
+	ContextTimeout             int    `mapstructure:"CONTEXT_TIMEOUT"`
+	DBHost                     string `mapstructure:"DB_HOST"`
+	DBPort                     string `mapstructure:"DB_PORT"`
+	DBUser                     string `mapstructure:"DB_USER"`
+	DBPass                     string `mapstructure:"DB_PASS"`
+	DBName                     string `mapstructure:"DB_NAME"`
+	RedisUser                  string `mapstructure:"REDIS_USER"`
+	RedisPassword              string `mapstructure:"REDIS_PASSWORD"`
+	RedisHost                  string `mapstructure:"REDIS_HOST"`
+	RedisPort                  string `mapstructure:"REDIS_PORT"`
+	RedisDB                    int    `mapstructure:"REDIS_DB"`
+	RedisExpireTime            int    `mapstructure:"REDIS_EXPIRE_TIME"`
+	CloudinaryDefaultUserImage string `mapstructure:"CLOUDINARY_DEFAULT_USER_IMAGE"`
+	CloudinaryDefaultProduct   string `mapstructure:"CLOUDINARY_DEFAULT_PRODUCT"`
+	CloudinaryUrl              string `mapstructure:"CLOUDINARY_URL"`
+	CloudinaryApiKey           string `mapstructure:"CLOUDINARY_API_KEY"`
+	CloudinaryApiSecret        string `mapstructure:"CLOUDINARY_API_SECRET"`
+	Key                        string `mapstructure:"KEY"`
 }
 
 func NewEnv() *Env {

@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
 	"sbj-backend/internal/validator"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type ProductsController struct {
@@ -42,6 +43,8 @@ func (p *ProductsController) Products(c *fiber.Ctx) error {
 }
 
 func (p *ProductsController) CreateProduct(c *fiber.Ctx) error {
+	sessionId := c.Cookies("session_id")
+
 	request := new(web.ProductRequest)
 
 	if err := c.BodyParser(request); err != nil {
@@ -53,7 +56,7 @@ func (p *ProductsController) CreateProduct(c *fiber.Ctx) error {
 		return validator.HandleValidationErrors(c, err)
 	}
 
-	err := p.ProductsUsecase.ProductCreate(c.Context(), p.Env, request)
+	err := p.ProductsUsecase.ProductCreate(c.Context(), sessionId, p.Env, request)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Message: err.Error()})
 	}

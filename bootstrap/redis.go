@@ -2,9 +2,10 @@ package bootstrap
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 func NewRedisClient(env *Env) *redis.Client {

@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"mime/multipart"
 	"os"
 	"sbj-backend/bootstrap"
@@ -13,6 +12,8 @@ import (
 	"sbj-backend/internal/encry"
 	"sbj-backend/internal/helpers"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type signupUsecase struct {
@@ -61,7 +62,11 @@ func (su *signupUsecase) GetUserByEmail(c context.Context, email string) (*domai
 	return su.userRepository.GetByEmail(ctx, email)
 }
 
-func (su *signupUsecase) CreateUser(c context.Context, request *web.SignupRequest) error {
+func (su *signupUsecase) CreateUser(env *bootstrap.Env, c context.Context, request *web.SignupRequest) error {
+	if request.Avatar == "" {
+		request.Avatar = env.CloudinaryDefaultUserImage
+	}
+
 	encryptedPassword, err := encry.HashPassword(request.Password)
 	if err != nil {
 		return err

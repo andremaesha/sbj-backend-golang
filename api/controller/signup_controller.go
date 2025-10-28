@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
 	"sbj-backend/internal/validator"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type SignupController struct {
@@ -31,7 +32,7 @@ func (sc *SignupController) Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).JSON(domain.ErrorResponse{Message: "user already exists with the given email"})
 	}
 
-	err = sc.SignupUsecase.CreateUser(c.Context(), request)
+	err = sc.SignupUsecase.CreateUser(sc.Env, c.Context(), request)
 	if err != nil {
 		panic(err)
 	}

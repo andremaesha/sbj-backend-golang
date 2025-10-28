@@ -2,11 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/goccy/go-json"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/monitor"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"log"
 	"os"
 	"os/signal"
@@ -16,6 +11,12 @@ import (
 	"sbj-backend/internal/validator"
 	"syscall"
 	"time"
+
+	"github.com/goccy/go-json"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 func main() {

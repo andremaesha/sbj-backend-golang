@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain/web"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 type LogoutController struct {

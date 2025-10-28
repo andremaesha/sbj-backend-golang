@@ -11,12 +11,12 @@ type ProductsRequest struct {
 }
 
 type ProductRequest struct {
-	Name        string  `json:"name" validate:"required,min=3,max=100"`
-	Description string  `json:"description" validate:"required,min=10,max=1000"`
-	Price       float64 `json:"price" validate:"required,min=0.01"`
-	Category    string  `json:"category" validate:"required"`
-	Stock       int     `json:"stock" validate:"required,min=0"`
-	ImageUrl    string  `json:"image_url,omitempty"`
+	Name        string       `json:"name" validate:"required,min=3,max=100"`
+	Description string       `json:"description" validate:"required,min=10,max=20000"`
+	Price       float64      `json:"price" validate:"required,min=0.01"`
+	Category    string       `json:"category" validate:"required"`
+	Stock       int          `json:"stock" validate:"required,min=0"`
+	Images      []*ImagesUrl `json:"images,omitempty"`
 }
 
 type ProductsResponse struct {
@@ -43,15 +43,15 @@ type ProductsImagesResponse struct {
 }
 
 type ImagesUrl struct {
-	AssetId  string `json:"asset_id"`
-	PublicId string `json:"public_id"`
-	Url      string `json:"url"`
+	AssetId  string `json:"asset_id" validate:"required"`
+	PublicId string `json:"public_id" validate:"required"`
+	Url      string `json:"url" validate:"required"`
 }
 
 type ProductsUsecase interface {
 	Product(c context.Context, id string) (*ProductResponse, error)
 	Products(c context.Context) (*ProductsResponse, error)
-	ProductCreate(c context.Context, env *bootstrap.Env, request *ProductRequest) error
+	ProductCreate(c context.Context, sessionId string, env *bootstrap.Env, request *ProductRequest) error
 	ValidateProductId(id string) error
 	ValidatePermission(c context.Context, key, data string) error
 	UploadImages(env *bootstrap.Env, fileHeader []*multipart.FileHeader) (*ProductsImagesResponse, error)

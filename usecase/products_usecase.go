@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"mime/multipart"
 	"os"
 	"sbj-backend/bootstrap"
@@ -15,6 +14,8 @@ import (
 	"sbj-backend/internal/helpers"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type productsUsecase struct {
@@ -100,7 +101,22 @@ func (pu *productsUsecase) ValidateProductId(id string) error {
 	return nil
 }
 
-func (pu *productsUsecase) ProductCreate(c context.Context, env *bootstrap.Env, request *web.ProductRequest) error {
+func (pu *productsUsecase) ProductCreate(c context.Context, sessionId string, env *bootstrap.Env, request *web.ProductRequest) error {
+	session, err := helpers.DecryptAES(sessionId, env.Key)
+	if err != nil {
+		panic(err)
+	}
+
+	user, err := pu.userRepository.GetSession(c, session)
+	if err != nil {
+		return err
+	}
+
+	_, err = pu.userRepository.GetByEmail(c, user.Email)
+	if err != nil {
+		return err
+	}
+
 	// Create a new context with timeout
 	ctx, cancel := context.WithTimeout(c, pu.contextTimeout)
 	defer cancel()
@@ -113,26 +129,44 @@ func (pu *productsUsecase) ProductCreate(c context.Context, env *bootstrap.Env, 
 		Description: request.Description,
 		Category:    request.Category,
 		Stock:       request.Stock,
+		CreatedBy:   user.Id,
 		IsActive:    true,
 		CreatedAt:   &now,
 	}
 
 	// Create the product
-	err := pu.productsRepository.Create(ctx, product)
+	err = pu.productsRepository.Create(ctx, product)
 	if err != nil {
 		panic(err)
 	}
 
-	image := &domain.Images{
-		ProductsId: product.Id,
-		Url:        env.CloudinaryDefaultProduct,
-		CreatedAt:  &sql.NullTime{Time: now, Valid: true},
-	}
+	if len(request.Images) == 0 {
+		image := &domain.Images{
+			ProductsId: product.Id,
+			Url:        env.CloudinaryDefaultProduct,
+			CreatedBy:  user.Id,
+			CreatedAt:  &sql.NullTime{Time: now, Valid: true},
+		}
 
-	if request.ImageUrl == "" {
 		err = pu.imagesRepository.Create(ctx, image)
 		if err != nil {
 			panic(err)
+		}
+	} else {
+		for _, item := range request.Images {
+			image := &domain.Images{
+				ProductsId: product.Id,
+				AssetId:    item.AssetId,
+				PublicId:   item.PublicId,
+				Url:        item.Url,
+				CreatedBy:  user.Id,
+				CreatedAt:  &sql.NullTime{Time: now, Valid: true},
+			}
+
+			err = pu.imagesRepository.Create(ctx, image)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
