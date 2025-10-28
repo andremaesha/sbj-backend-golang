@@ -112,9 +112,13 @@ func (pu *productsUsecase) ProductCreate(c context.Context, sessionId string, en
 		return err
 	}
 
-	_, err = pu.userRepository.GetByEmail(c, user.Email)
+	userData, err := pu.userRepository.GetById(c, user.Id)
 	if err != nil {
 		return err
+	}
+
+	if userData.Role != "admin" {
+		return errors.New("unauthorized access")
 	}
 
 	// Create a new context with timeout
@@ -140,33 +144,30 @@ func (pu *productsUsecase) ProductCreate(c context.Context, sessionId string, en
 		panic(err)
 	}
 
-	if len(request.Images) == 0 {
-		image := &domain.Images{
+	buildImage := func(assetId, publicId, url string) *domain.Images {
+		return &domain.Images{
 			ProductsId: product.Id,
-			Url:        env.CloudinaryDefaultProduct,
+			AssetId:    assetId,
+			PublicId:   publicId,
+			Url:        url,
 			CreatedBy:  user.Id,
 			CreatedAt:  &sql.NullTime{Time: now, Valid: true},
 		}
+	}
 
-		err = pu.imagesRepository.Create(ctx, image)
-		if err != nil {
-			panic(err)
+	// Images handling
+	if len(request.Images) == 0 {
+		img := buildImage("", "", env.CloudinaryDefaultProduct)
+		if err := pu.imagesRepository.Create(ctx, img); err != nil {
+			return err
 		}
-	} else {
-		for _, item := range request.Images {
-			image := &domain.Images{
-				ProductsId: product.Id,
-				AssetId:    item.AssetId,
-				PublicId:   item.PublicId,
-				Url:        item.Url,
-				CreatedBy:  user.Id,
-				CreatedAt:  &sql.NullTime{Time: now, Valid: true},
-			}
+		return nil
+	}
 
-			err = pu.imagesRepository.Create(ctx, image)
-			if err != nil {
-				panic(err)
-			}
+	for _, it := range request.Images {
+		img := buildImage(it.AssetId, it.PublicId, it.Url)
+		if err = pu.imagesRepository.Create(ctx, img); err != nil {
+			return err
 		}
 	}
 
