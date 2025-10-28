@@ -2,12 +2,13 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"runtime"
 	"sbj-backend/domain"
 	"sbj-backend/internal/logger"
 	"strings"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func NotFoundMiddleware(c *fiber.Ctx) error {

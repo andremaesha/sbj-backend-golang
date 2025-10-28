@@ -2,9 +2,10 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"sbj-backend/internal/logger"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func ResponseLogger(c *fiber.Ctx) error {

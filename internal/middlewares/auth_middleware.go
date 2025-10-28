@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 	"sbj-backend/bootstrap"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
 // AuthMiddleware checks if the user is authenticated
