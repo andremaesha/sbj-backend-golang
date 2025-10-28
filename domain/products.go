@@ -18,7 +18,7 @@ type Product struct {
 	NumOfReviews int        `gorm:"default:0"`
 	ReviewsId    int        `gorm:"default:null"`
 	IsActive     bool       `gorm:"default:false"`
-	CreatedBy    string     `gorm:"default:'SYSTEM'"`
+	CreatedBy    int        `gorm:"not null"`
 	CreatedAt    *time.Time `gorm:"default:now()"`
 	UpdatedBy    string     `gorm:"default:null"`
 	UpdatedAt    *time.Time `gorm:"default:null"`
