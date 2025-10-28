@@ -23,6 +23,7 @@ type User struct {
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	Update(ctx context.Context, user *User) error
+	GetById(c context.Context, id int) (*User, error)
 	GetByEmail(c context.Context, email string) (*User, error)
 	SetExpire(expire int)
 	GetSession(ctx context.Context, idSession string) (*User, error)
