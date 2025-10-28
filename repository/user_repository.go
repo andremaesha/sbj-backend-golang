@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"sbj-backend/domain"
 	"strconv"
 	"time"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
@@ -92,6 +93,17 @@ func (ur *userRepository) GetByEmail(c context.Context, email string) (*domain.U
 	result := new(domain.User)
 
 	err := ur.db.WithContext(c).Table(ur.table).Where("email = ?", email).First(result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (ur *userRepository) GetById(c context.Context, id int) (*domain.User, error) {
+	result := new(domain.User)
+
+	err := ur.db.WithContext(c).Table(ur.table).Where("id = ?", id).First(result).Error
 	if err != nil {
 		return nil, err
 	}
