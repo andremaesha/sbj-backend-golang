@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"sbj-backend/domain"
+
+	"gorm.io/gorm"
 )
 
 type imagesRepository struct {

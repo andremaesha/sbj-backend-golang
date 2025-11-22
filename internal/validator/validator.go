@@ -1,11 +1,12 @@
 package validator
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	"reflect"
 	"sbj-backend/domain"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 var validate *validator.Validate

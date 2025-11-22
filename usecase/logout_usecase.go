@@ -3,11 +3,12 @@ package usecase
 import (
 	"context"
 	"errors"
-	"github.com/gofiber/fiber/v2"
 	"sbj-backend/domain"
 	"sbj-backend/domain/web"
 	"sbj-backend/internal/helpers"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type LogoutUsecase struct {
