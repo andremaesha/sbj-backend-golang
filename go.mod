@@ -5,11 +5,11 @@ go 1.25.2
 require (
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/goccy/go-json v0.10.5
-	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/google/uuid v1.6.0
-	github.com/redis/go-redis/v9 v9.16.0
+	github.com/redis/go-redis/v9 v9.17.0
 	github.com/spf13/viper v1.21.0
-	golang.org/x/crypto v0.44.0
+	golang.org/x/crypto v0.45.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 	gorm.io/plugin/dbresolver v1.6.2
